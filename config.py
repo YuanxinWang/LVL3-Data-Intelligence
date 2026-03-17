@@ -4,16 +4,14 @@
 # In our case, provide a default value for testing purposes.
 import os
 from datetime import datetime
+from dotenv import load_dotenv
+load_dotenv()
 
 BASE_URL = "https://lh-proxy.onrender.com"
 
 # Fallback setup to enable local testing without Databricks env.
 try:
-    import IPython
-    dbutils = IPython.get_ipython().user_ns.get("dbutils")
-
-    if dbutils is None:
-        raise ValueError("dbutils not found in IPython namespace.")
+    from databricks.sdk.runtime import dbutils
 
     PROXY_PASSWORD = dbutils.secrets.get(scope="lh_secrets", key="proxy_pass")
 except Exception as e:

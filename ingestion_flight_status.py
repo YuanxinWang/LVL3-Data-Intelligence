@@ -22,6 +22,8 @@ def get_date_list(lookback_days):
 # return the json if success, else return None
 def single_fetch(pre_url, offset, limit):
     url = f"{pre_url}?limit={limit}&offset={offset}"
+    print(f"=======URL: {url}=========")
+    print(f"+++++++Header: {config.HEADERS}+++++++++")
     try:
         response = requests.get(url, headers=config.HEADERS, timeout = 20)
         if response.status_code == 200:
