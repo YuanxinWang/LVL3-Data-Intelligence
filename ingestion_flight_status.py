@@ -62,36 +62,24 @@ def execute_ingestion_flight_status(url, offset, limit, airport, date_str):
         return res1 if res1 is not None else res2
     
 
-# if __name__ == "__main__":
-#     target_dates = get_date_list(config.LOOKBACK_DAYS)
-#     for date in target_dates:
-#         print(f"\n[{datetime.now()}] Starting ingestion for date: {date}")
-#         api_path = f"/v1/operations/flightstatus/departures/{config.HUB_AIRPORT}/{date}T00:00"
-#         full_url = f"{config.BASE_URL}{api_path}"
-#         current_offset = 0
-#         total_count = 1
-#         while current_offset < total_count:
-#             result_total = execute_ingestion_flight_status(
-#                 full_url,
-#                 current_offset,
-#                 config.API_LIMIT,
-#                 config.HUB_AIRPORT,
-#                 date
-#             )
-#             if result_total and total_count == 1:
-#                 total_count = result_total
-#                 print(f"    Total records to fetch: {total_count}")
-#             current_offset += config.API_LIMIT
-#         print(f"[{datetime.now()}] Completed ingestion for date: {date}")
-
 if __name__ == "__main__":
-    # 我们只拿“昨天”的日期来测试逻辑是否通顺
-    yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-    
-    # 打印一下 URL，你自己手动点击或在浏览器里访问一下这个 URL
-    api_path = f"/v1/operations/flightstatus/departures/{config.HUB_AIRPORT}/{yesterday}T00:00"
-    full_url = f"{config.BASE_URL}{api_path}"
-    print(f"Testing URL: {full_url}")
-    
-    # 运行一次抓取
-    execute_ingestion_flight_status(full_url, 0, 100, config.HUB_AIRPORT, yesterday)
+    target_dates = get_date_list(config.LOOKBACK_DAYS)
+    for date in target_dates:
+        print(f"\n[{datetime.now()}] Starting ingestion for date: {date}")
+        api_path = f"/v1/operations/flightstatus/departures/{config.HUB_AIRPORT}/{date}T00:00"
+        full_url = f"{config.BASE_URL}{api_path}"
+        current_offset = 0
+        total_count = 1
+        while current_offset < total_count:
+            result_total = execute_ingestion_flight_status(
+                full_url,
+                current_offset,
+                config.API_LIMIT,
+                config.HUB_AIRPORT,
+                date
+            )
+            if result_total and total_count == 1:
+                total_count = result_total
+                print(f"    Total records to fetch: {total_count}")
+            current_offset += config.API_LIMIT
+        print(f"[{datetime.now()}] Completed ingestion for date: {date}")
