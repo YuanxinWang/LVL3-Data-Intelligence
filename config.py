@@ -9,12 +9,15 @@ BASE_URL = "https://lh-proxy.onrender.com"
 
 # Fallback setup to enable local testing without Databricks env.
 try:
-    from pyspark.dbutils import DBUtils
-    from pyspark.sql import SparkSession
-    spark = SparkSession.builder.getOrCreate()
-    dbutils = DBUtils(spark)
-    PROXY_PASSWORD = dbutils.secrets.get(scope="lh-proxy", key="password")
-except:
+    import IPython
+    dbutils = IPython.get_ipython().user_ns.get("dbutils")
+
+    if dbutils is None:
+        raise ValueError("dbutils not found in IPython namespace.")
+
+    PROXY_PASSWORD = dbutils.secrets.get(scope="lh_secrets", key="proxy_pass")
+except Exception as e:
+    print(f"[{datetime.now()}] Databricks secret fetch failed: {e}")
     PROXY_PASSWORD = os.getenv("LH_PROXY_PASSWORD", "default_password")
 
 HEADERS = {"password": PROXY_PASSWORD}
