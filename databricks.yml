@@ -1,0 +1,26 @@
+bundle:
+  name: LVL3-Data-Intelligence
+
+targets:
+  dev:
+    default: true
+    workspace:
+      host: https://dbc-6353a6c5-179c.cloud.databricks.com
+
+resources:
+  jobs:
+    FRA_flights:
+      name: "[Daily] FRA arr&dep"
+      schedule:
+        quartz_cron_expression: "0 0 23 * * ?"
+        timezone_id: "Europe/Berlin"
+      environments:
+        - environment_key: my_serverless_env
+          spec:
+            environment_version: "4"
+            
+      tasks:
+        - task_key: fetch_fra_flights
+          environment_key: my_serverless_env
+          notebook_task:
+            notebook_path: ./fetch_FRA_arr_dep.ipynb
