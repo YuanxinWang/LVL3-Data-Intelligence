@@ -1,6 +1,7 @@
 # without Databricks env, dbtils will error.
 # Program will try to take local env instead.
 # Call ov.getenv() in this case - need os library
+# In our case, provide a default value for testing purposes.
 import os
 from datetime import datetime
 
