@@ -18,14 +18,11 @@ def get_date_list(lookback_days):
     return date_list
 
 
-def get_time_slots():
-    return ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"]
-
-
 # send out a request
 # return the json if success, else return None
-def single_fetch(url, offset, limit):
-    params = {"offset": offset, "limit": limit}
+def single_fetch(pre_url, offset, limit):
+    url = f"{pre_url}?offset={offset}&limit={limit}"
+    print(f"*****URL = {url}*****")
     try:
         response = requests.get(url, headers=config.HEADERS, timeout = 20)
         if response.status_code == 200:
@@ -48,8 +45,8 @@ def save_to_volume(raw_json, airport, date_str, offset, limit):
 
 # binary search when fail
 # extra return check for different search cases
-def execute_ingestion_flight_status(pre-url, offset, limit, airport, date_str):
-    raw_data = single_fetch(pre-url, offset, limit)
+def execute_ingestion_flight_status(pre_url, offset, limit, airport, date_str):
+    raw_data = single_fetch(pre_url, offset, limit)
     if raw_data is not None:
         save_to_volume(raw_data, airport, date_str, offset, limit)
         return raw_data.get(KEY_RESOURCE, {}).get(KEY_META, {}).get(KEY_TOTAL, 0)
@@ -59,8 +56,8 @@ def execute_ingestion_flight_status(pre-url, offset, limit, airport, date_str):
             return None
         mid = limit // 2
         print(f"    [Retry] Offset {offset}, New Limit {mid}")
-        res1 = execute_ingestion_flight_status(url, offset, mid, airport, date_str)
-        res2 = execute_ingestion_flight_status(url, offset + mid, limit - mid, airport, date_str)
+        res1 = execute_ingestion_flight_status(pre_url, offset, mid, airport, date_str)
+        res2 = execute_ingestion_flight_status(pre_url, offset + mid, limit - mid, airport, date_str)
         if res1 is not None and res2 is not None:
             return max(res1, res2)
         return res1 if res1 is not None else res2
