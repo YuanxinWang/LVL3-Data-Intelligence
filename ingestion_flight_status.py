@@ -18,12 +18,16 @@ def get_date_list(lookback_days):
     return date_list
 
 
+def get_time_slots():
+    return ["00:00", "04:00", "08:00", "12:00", "16:00", "20:00"]
+
+
 # send out a request
 # return the json if success, else return None
 def single_fetch(url, offset, limit):
     params = {"offset": offset, "limit": limit}
     try:
-        response = requests.get(url, headers=config.HEADERS, params=params, timeout = 20)
+        response = requests.get(url, headers=config.HEADERS, timeout = 20)
         if response.status_code == 200:
             return response.json()
         return None
@@ -44,8 +48,8 @@ def save_to_volume(raw_json, airport, date_str, offset, limit):
 
 # binary search when fail
 # extra return check for different search cases
-def execute_ingestion_flight_status(url, offset, limit, airport, date_str):
-    raw_data = single_fetch(url, offset, limit)
+def execute_ingestion_flight_status(pre-url, offset, limit, airport, date_str):
+    raw_data = single_fetch(pre-url, offset, limit)
     if raw_data is not None:
         save_to_volume(raw_data, airport, date_str, offset, limit)
         return raw_data.get(KEY_RESOURCE, {}).get(KEY_META, {}).get(KEY_TOTAL, 0)
@@ -60,26 +64,3 @@ def execute_ingestion_flight_status(url, offset, limit, airport, date_str):
         if res1 is not None and res2 is not None:
             return max(res1, res2)
         return res1 if res1 is not None else res2
-    
-
-if __name__ == "__main__":
-    target_dates = get_date_list(config.LOOKBACK_DAYS)
-    for date in target_dates:
-        print(f"\n[{datetime.now()}] Starting ingestion for date: {date}")
-        api_path = f"/v1/operations/flightstatus/departures/{config.HUB_AIRPORT}/{date}T00:00"
-        full_url = f"{config.BASE_URL}{api_path}"
-        current_offset = 0
-        total_count = 1
-        while current_offset < total_count:
-            result_total = execute_ingestion_flight_status(
-                full_url,
-                current_offset,
-                config.API_LIMIT,
-                config.HUB_AIRPORT,
-                date
-            )
-            if result_total and total_count == 1:
-                total_count = result_total
-                print(f"    Total records to fetch: {total_count}")
-            current_offset += config.API_LIMIT
-        print(f"[{datetime.now()}] Completed ingestion for date: {date}")
