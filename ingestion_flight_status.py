@@ -32,9 +32,9 @@ def single_fetch(pre_url, offset, limit):
 
 
 # save json file to volume with offset and limit in name for tracking
-def save_to_volume(raw_json, airport, date_str, offset, limit):
+def save_to_volume(raw_json, airport, flight_type, date_str, offset, limit):
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    filename = f"{airport}_{date_str}_off{offset}_lim{limit}_{timestamp}.json"
+    filename = f"{airport}_{flight_type}_{date_str}_off{offset}_lim{limit}_{timestamp}.json"
     full_path = f"{config.VOLUME_PATH}{filename}"
 
     with open(full_path, "w", encoding="utf-8") as f:
@@ -44,10 +44,10 @@ def save_to_volume(raw_json, airport, date_str, offset, limit):
 
 # binary search when fail
 # extra return check for different search cases
-def execute_ingestion_flight_status(pre_url, offset, limit, airport, date_str):
+def execute_ingestion_flight_status(pre_url, offset, limit, airport, flight_type, date_str):
     raw_data = single_fetch(pre_url, offset, limit)
     if raw_data is not None:
-        save_to_volume(raw_data, airport, date_str, offset, limit)
+        save_to_volume(raw_data, airport, flight_type,date_str, offset, limit)
         return raw_data.get(KEY_RESOURCE, {}).get(KEY_META, {}).get(KEY_TOTAL, 0)
     else:
         if limit <= 1:
@@ -55,8 +55,8 @@ def execute_ingestion_flight_status(pre_url, offset, limit, airport, date_str):
             return None
         mid = limit // 2
         print(f"    [Retry] Offset {offset}, New Limit {mid}")
-        res1 = execute_ingestion_flight_status(pre_url, offset, mid, airport, date_str)
-        res2 = execute_ingestion_flight_status(pre_url, offset + mid, limit - mid, airport, date_str)
+        res1 = execute_ingestion_flight_status(pre_url, offset, mid, airport, flight_type, date_str)
+        res2 = execute_ingestion_flight_status(pre_url, offset + mid, limit - mid, airport, flight_type, date_str)
         if res1 is not None and res2 is not None:
             return max(res1, res2)
         return res1 if res1 is not None else res2
