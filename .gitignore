@@ -1,3 +1,5 @@
 .venv
 .databricks
 .env
+*pycache*
+*.vscode
