@@ -4,8 +4,6 @@
 # In our case, provide a default value for testing purposes.
 import os
 from datetime import datetime
-from dotenv import load_dotenv
-load_dotenv()
 
 BASE_URL = "https://lh-proxy.onrender.com"
 
