@@ -34,7 +34,7 @@ def single_fetch(pre_url, offset, limit):
 # save json file to volume with offset and limit in name for tracking
 def save_to_volume(raw_json, airport, flight_type, date_str, offset, limit):
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    filename = f"{airport}_{flight_type}_{date_str}_off{offset}_lim{limit}_{timestamp}.json"
+    filename = f"{timestamp}_{airport}_{flight_type}_{date_str}_off{offset}_lim{limit}.json"
     full_path = f"{config.VOLUME_PATH}{filename}"
 
     with open(full_path, "w", encoding="utf-8") as f:

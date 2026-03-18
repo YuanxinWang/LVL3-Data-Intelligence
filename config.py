@@ -20,6 +20,6 @@ HEADERS = {"password": PROXY_PASSWORD}
 VOLUME_PATH = "/Volumes/workspace/lufthansa/raw_data/"
 HUB_AIRPORT = "FRA"
 LOOKBACK_DAYS = 7
-API_LIMIT = 100
+API_LIMIT = 50
 
 print(f"[{datetime.now()}] Config loaded successfully. Proxy password: {'*' * len(PROXY_PASSWORD)}")
