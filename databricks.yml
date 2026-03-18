@@ -22,5 +22,5 @@ resources:
       tasks:
         - task_key: fetch_fra_flights
           environment_key: my_serverless_env
-          notebook_task:
-            notebook_path: ./fetch_FRA_arr_dep.ipynb
+          spark_python_task:
+            python_file: ./fetch_FRA_arr_dep.py
