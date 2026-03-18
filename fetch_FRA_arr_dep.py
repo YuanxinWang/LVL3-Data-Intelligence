@@ -19,5 +19,10 @@ for date in target_dates:
         for flight_type in flight_types:
             print(f"Fetching {flight_type}...")
             
-            full_url = f"{config.BASE_URL}/v1/operations/flightstatus/{flight_type}/{config.HUB_AIRPORT}/{from_datetime}"
-            ingest.execute_ingestion_flight_status(full_url, 0, config.API_LIMIT, config.HUB_AIRPORT, flight_type, from_datetime.replace(":", ""))
+            pre_url = f"{config.BASE_URL}/v1/operations/flightstatus/{flight_type}/{config.HUB_AIRPORT}/{from_datetime}"
+            ingest.fetch_window_paginated(
+                pre_url,
+                config.HUB_AIRPORT,
+                flight_type,
+                from_datetime.replace(":", "")
+            )

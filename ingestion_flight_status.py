@@ -1,6 +1,7 @@
 import config
 import json
 import requests
+import time
 from datetime import datetime, timedelta
 
 
@@ -60,3 +61,19 @@ def execute_ingestion_flight_status(pre_url, offset, limit, airport, flight_type
         if res1 is not None and res2 is not None:
             return max(res1, res2)
         return res1 if res1 is not None else res2
+
+
+# In one 4 hour block, push offset forward until total count is reached
+def fetch_window_paginated(pre_url, airport, flight_type, data_str):
+    current_offset = 0
+    total_count = 1
+    
+    while current_offset < total_count:
+        returned_total = execute_ingestion_flight_status(
+            pre_url, current_offset, config.API_LIMIT,
+            airport, flight_type, data_str)
+        if returned_total is not None and current_offset == 0:
+            total_count = returned_total
+            print(f"	[Total] {total_count} flights expected.")
+        current_offset += config.API_LIMIT
+        time.sleep(0.4)
