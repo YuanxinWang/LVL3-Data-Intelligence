@@ -17,7 +17,7 @@ except Exception as e:
     PROXY_PASSWORD = os.getenv("LH_PROXY_PASSWORD", "default_password")
 
 HEADERS = {"password": PROXY_PASSWORD}
-VOLUME_PATH = "/Volumes/workspace/lufthansa/raw_data/"
+VOLUME_PATH = "/Volumes/workspace/lufthansa/raw_data/flight_status/"
 HUB_AIRPORT = "FRA"
 LOOKBACK_DAYS = 7
 API_LIMIT = 50
