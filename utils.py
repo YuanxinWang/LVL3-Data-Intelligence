@@ -10,22 +10,22 @@ import config
 def single_fetch(pre_url, offset, limit):
     url = f"{pre_url}?limit={limit}&offset={offset}"
     
-    for attempt in range(config.max_retries):
+    for attempt in range(config.MAX_RETRIES):
         try:
             response = requests.get(url, headers=config.HEADERS, timeout = 20)
             if response.status_code == 200:
                 return response.json()
             elif response.status_code == [429, 502, 503, 504]:
-                delay = config.base_delay * (2 ** attempt)
-                print(f"[{datetime.now()}] API Rate Limit. Retrying in {delay}s. ({attempt+1}/{config.max_retries})")
+                delay = config.BASE_DELAY * (2 ** attempt)
+                print(f"[{datetime.now()}] API Rate Limit. Retrying in {delay}s. ({attempt+1}/{config.MAX_RETRIES})")
                 time.sleep(delay)
                 continue
             else:
                 print(f"[{datetime.now()}] Error: {response.status_code} at offset {offset}")
                 return None
         except Exception as e:
-            delay = config.base_delay * (2 ** attempt)
-            print(f"[{datetime.now()}] Request Exception: {e}. Retrying in {delay}s. ({attempt+1}/{config.max_retries})")
+            delay = config.BASE_DELAY * (2 ** attempt)
+            print(f"[{datetime.now()}] Request Exception: {e}. Retrying in {delay}s. ({attempt+1}/{config.MAX_RETRIES})")
             time.sleep(delay)
     print(f"[{datetime.now()}] Max retries reached for offset {offset}. Giving up.")
     return None
