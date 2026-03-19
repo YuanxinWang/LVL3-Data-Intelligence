@@ -17,9 +17,19 @@ except Exception as e:
     PROXY_PASSWORD = os.getenv("LH_PROXY_PASSWORD", "default_password")
 
 HEADERS = {"password": PROXY_PASSWORD}
-VOLUME_PATH = "/Volumes/workspace/lufthansa/raw_data/flight_status/"
+
+VOLUME_BASE_PATH = "/Volumes/workspace/lufthansa/raw_data"
+VOLUME_FLIGHT_STATUS = f"{VOLUME_BASE_PATH}/flight_status/"
+VOLUME_REFERENCE = f"{VOLUME_BASE_PATH}/reference_data/"
+
 HUB_AIRPORT = "FRA"
 LOOKBACK_DAYS = 7
 API_LIMIT = 50
+
+MAX_RETRIES = 12
+BASE_DELAY = 2
+
+TIME_SLOTS = ["04:00", "08:00", "12:00", "16:00", "20:00", "00:00"]
+FLIGHT_TYPES = ["arrivals", "departures"]
 
 print(f"[{datetime.now()}] Config loaded successfully. Proxy password: {'*' * len(PROXY_PASSWORD)}")

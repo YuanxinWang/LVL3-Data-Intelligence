@@ -9,6 +9,7 @@ targets:
 
 resources:
   jobs:
+    # Job 1: Daily Fetch of FRA Flights 
     FRA_flights:
       name: "[Daily] FRA arr&dep"
       schedule:
@@ -23,4 +24,23 @@ resources:
         - task_key: fetch_fra_flights
           environment_key: my_serverless_env
           spark_python_task:
-            python_file: ./fetch_FRA_arr_dep.py
+            python_file: ./fetch_airport_arr_dep.py
+
+    # Job 2: Monthly Fetch of Reference Data
+    reference_data:
+      name: "[Monthly] Reference Data"
+      schedule:
+        quartz_cron_expression: "0 0 2 1 * ?"
+        timezone_id: "Europe/Berlin"
+      environments:
+        - environment_key: my_serverless_env
+          spec:
+            environment_version: "4"
+
+      tasks:
+        - task_key: fetch_ref_data
+          environment_key: my_serverless_env
+          spark_python_task:
+            python_file: ./fetch_reference_data.py
+
+# databricks bundle deploy -t dev

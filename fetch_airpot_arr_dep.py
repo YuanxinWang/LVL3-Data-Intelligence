@@ -1,0 +1,41 @@
+import sys
+import os
+from datetime import datetime, timedelta
+
+
+# allow Python to look up in current folder
+sys.path.append(os.path.abspath('.'))
+
+import config
+import ingestion_core
+
+
+def get_date_list(lookback_days):
+    date_list = []
+    for i in range(lookback_days):
+        date = datetime.now() - timedelta(days = i)
+        date_list.append(date.strftime("%Y-%m-%d"))
+    return date_list
+
+
+target_dates = get_date_list(config.LOOKBACK_DAYS)
+
+
+for date in target_dates:
+    for slot in config.TIME_SLOTS:
+        from_datetime = f"{date}T{slot}"
+        for flight_type in config.FLIGHT_TYPES:
+            print(f"Fetching {flight_type.upper()} for {from_datetime}...")
+            
+            pre_url = f"{config.BASE_URL}/v1/operations/flightstatus/{flight_type}/{config.HUB_AIRPORT}/{from_datetime}"
+            file_prefix = f"{config.HUB_AIRPORT}_{flight_type}_{from_datetime.replace(':', '')}"
+            resource_key = "FlightStatusResource"
+
+            ingestion_core.fetch_paginated(
+                pre_url=pre_url, 
+                file_prefix=file_prefix, 
+                resource_key=resource_key, 
+                target_path=config.VOLUME_FLIGHT_STATUS
+            )
+
+print("Flight Status Ingestion Completed Successfully!")
