@@ -7,6 +7,7 @@ import config
 
 # send out a request
 # return the json if success, else return None
+# exponential backoff retry mechanism for robustness against transient API issues.
 def single_fetch(pre_url, offset, limit):
     url = f"{pre_url}?limit={limit}&offset={offset}"
     

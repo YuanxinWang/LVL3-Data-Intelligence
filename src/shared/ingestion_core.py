@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 
 
+# Core function to execute paginated fetching with error handling and binary search retry mechanism
 def execute_ingestion(pre_url, offset, limit, file_prefix, resource_key, target_path):
     raw_data = utils.single_fetch(pre_url, offset, limit)
     if raw_data is not None:
@@ -27,6 +28,7 @@ def execute_ingestion(pre_url, offset, limit, file_prefix, resource_key, target_
         return res1 if res1 is not None else res2
 
 
+# Wrapper function to handle pagination logic
 def fetch_paginated(pre_url, file_prefix, resource_key, target_path, api_limit):
     current_offset = 0
     total_count = 1

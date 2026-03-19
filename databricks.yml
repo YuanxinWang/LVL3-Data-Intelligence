@@ -43,6 +43,21 @@ resources:
           spark_python_task:
             python_file: ./src/ingestion/fetch_reference_data.py
 
+    # Job 3: Autoloader Pipeline for Flight Status Data
+    Bronze_flights_pipeline:
+      name: "[Bronze] Load Flight Status"
+      environments:
+        - environment_key: my_serverless_env
+          spec:
+            environment_version: "4"
+      
+      tasks:
+        - task_key: run_autoloader_flights
+          environment_key: my_serverless_env
+          spark_python_task:
+            python_file: ./src/transformation/load_bronze_flights.py
+      
+
 # databricks bundle deploy -t dev
 # databricks bundle run FRA_flights -t dev
 # databricks bundle run Reference_data -t dev
