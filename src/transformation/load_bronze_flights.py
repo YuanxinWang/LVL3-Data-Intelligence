@@ -3,14 +3,19 @@ import os
 from pyspark.sql.functions import current_timestamp
 
 # Allow Python to find src folder
-sys.path.append(os.path.abspath('.'))
+current_dir = os.getcwd()
+project_root = os.path.abspath(os.path.join(current_dir, "../../"))
+
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from src.shared import config
 
 
 print(f"Starging Auto Loader: Bronze Flight Status")
 
 
-def load_bronze_flight():
+def load_bronze_flights():
     source_path = config.VOLUME_FLIGHT_STATUS
     print(f"Reading from source path: {source_path}")
     raw_df = (spark.readStream
@@ -18,15 +23,19 @@ def load_bronze_flight():
               .option("cloudFiles.format", "json")
               .option("cloudFiles.schemaLocation", config.CHK_BRONZE_FLIGHTS)
               .option("cloudFiles.inferColumnTypes", "true")
+              .option("multiLine", "true")
               .load(source_path))
-    enriched_df = raw_df.withColumn("bronze_intested_at", current_timestamp())
+    enriched_df = raw_df.withColumn("bronze_ingested_at", current_timestamp())
     print(f"Writing to Delta Table: {config.TABLE_BRONZE_FLIGHTS}")
     query = (enriched_df.writeStream
              .format("delta")
              .option("checkpointLocation", config.CHK_BRONZE_FLIGHTS)
              .trigger(availableNow=True)
              .option("mergeSchema", "true")
-             .start(config.TABLE_BRONZE_FLIGHTS))
+             .toTable(config.TABLE_BRONZE_FLIGHTS))
     query.awaitTermination()
     print("Bronze FLight Status loaded successfully.")
-    
+
+
+if __name__ == "__main__":
+    load_bronze_flights()
