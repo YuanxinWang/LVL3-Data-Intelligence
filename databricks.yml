@@ -27,7 +27,7 @@ resources:
             python_file: ./fetch_airport_arr_dep.py
 
     # Job 2: Monthly Fetch of Reference Data
-    reference_data:
+    Reference_data:
       name: "[Monthly] Reference Data"
       schedule:
         quartz_cron_expression: "0 0 2 1 * ?"
@@ -44,3 +44,5 @@ resources:
             python_file: ./fetch_reference_data.py
 
 # databricks bundle deploy -t dev
+# databricks bundle run FRA_flights -t dev
+# databricks bundle run Reference_data -t dev
