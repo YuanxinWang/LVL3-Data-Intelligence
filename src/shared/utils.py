@@ -2,7 +2,32 @@ import json
 import requests
 import time
 from datetime import datetime, timedelta
-import config
+from src.shared import config
+
+
+# API known issue: Arrays containing just 1 member are not shown as arrays in JSON responses
+# make sure we always have a list in the end
+def ensure_list(element):
+    if element is None:
+        return []
+    elif isinstance(element, list):
+        return element
+    return [element]
+
+
+# print out the error details for API error responses.
+def log_api_error(data, offset):
+    error_node = data.get(config.KEY_ERROR_ROOT)
+    if not error_node:
+        return
+    if isinstance(error_node, dict):
+        error_node = error_node.get(config.KEY_ERROR_DETAILS, error_node)  
+    error_list = ensure_list(error_node)
+    if error_list:
+        first_error = error_list[0]
+        error_type = first_error.get(config.KEY_ERROR_TYPE, "Unknown")
+        error_desc = first_error.get(config.KEY_ERROR_DESC, "No description")
+        print(f"[{datetime.now()}] API Error at offset {offset}: {error_type} - {error_desc}")
 
 
 # send out a request
@@ -17,10 +42,7 @@ def single_fetch(pre_url, offset, limit):
             if response.status_code == 200:
                 data = response.json()
                 if config.KEY_ERROR_ROOT in data:
-                    error_info = data[config.KEY_ERROR_ROOT].get(config.KEY_ERROR_DETAILS, {})
-                    error_type = error_info.get(config.KEY_ERROR_TYPE, "Unknown")
-                    error_desc = error_info.get(config.KEY_ERROR_DESC, "No description")
-                    print(f"[{datetime.now()}] API Error at offset {offset}: {error_type} - {error_desc}")
+                    log_api_error(data, offset)
                     return None
                 return data
             elif response.status_code in [429, 502, 503, 504]:

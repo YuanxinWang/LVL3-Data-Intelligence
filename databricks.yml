@@ -9,9 +9,9 @@ targets:
 
 resources:
   jobs:
-    # Job 1: Daily Fetch of FRA Flights 
-    FRA_flights:
-      name: "[Daily] FRA arr&dep"
+    # Job 1: Daily Pipeline for FRA Flights (Ingestion -> Bronze)
+    FRA_flights_pipeline:
+      name: "[Pipeline][Daily] FRA arr&dep to Bronze"
       schedule:
         quartz_cron_expression: "0 0 23 * * ?"
         timezone_id: "Europe/Berlin"
@@ -21,10 +21,20 @@ resources:
             environment_version: "4"
             
       tasks:
+        # Task 1: Fetch FRA Flights Data from API
         - task_key: fetch_fra_flights
           environment_key: my_serverless_env
           spark_python_task:
             python_file: ./src/ingestion/fetch_airport_arr_dep.py
+  
+        # Task 2: Load FRA Flights Data into Bronze Delta Table
+        - task_key: run_autoloader_flights
+          depends_on:
+            - task_key: fetch_fra_flights
+          environment_key: my_serverless_env
+          spark_python_task:
+            python_file: ./src/transformation/load_bronze_flights.py
+
 
     # Job 2: Monthly Fetch of Reference Data
     Reference_data:
@@ -42,22 +52,8 @@ resources:
           environment_key: my_serverless_env
           spark_python_task:
             python_file: ./src/ingestion/fetch_reference_data.py
-
-    # Job 3: Autoloader Pipeline for Flight Status Data
-    Bronze_flights_pipeline:
-      name: "[Bronze] Load Flight Status"
-      environments:
-        - environment_key: my_serverless_env
-          spec:
-            environment_version: "4"
-      
-      tasks:
-        - task_key: run_autoloader_flights
-          environment_key: my_serverless_env
-          spark_python_task:
-            python_file: ./src/transformation/load_bronze_flights.py
       
 
 # databricks bundle deploy -t dev
-# databricks bundle run FRA_flights -t dev
+# databricks bundle run FRA_flights_pipeline -t dev
 # databricks bundle run Reference_data -t dev

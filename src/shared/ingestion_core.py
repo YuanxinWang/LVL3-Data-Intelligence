@@ -1,7 +1,9 @@
-import config
-import utils
 import time
 from datetime import datetime
+
+# Entry Point is in folder ingestion, path already loaded. Here call from directly
+from src.shared import config
+from src.shared import utils
 
 
 # Core function to execute paginated fetching with error handling and binary search retry mechanism

@@ -2,9 +2,12 @@ import sys
 import os
 from datetime import datetime, timedelta
 
+# Allow Python to find src folder
+current_dir = os.getcwd()
+project_root = os.path.abspath(os.path.join(current_dir, "../../"))
 
-# allow Python to look up in current folder
-sys.path.append(os.path.abspath('.'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 from src.shared import config
 from src.shared import ingestion_core
