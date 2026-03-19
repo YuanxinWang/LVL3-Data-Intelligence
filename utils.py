@@ -17,7 +17,7 @@ def single_fetch(pre_url, offset, limit):
                 return response.json()
             elif response.status_code == [429, 502, 503, 504]:
                 delay = config.base_delay * (2 ** attempt)
-                print(f"[{datetime.now()}] API Rate Limit. Retrying in {delay}s. ({attempt+1}/{max_retries})")
+                print(f"[{datetime.now()}] API Rate Limit. Retrying in {delay}s. ({attempt+1}/{config.max_retries})")
                 time.sleep(delay)
                 continue
             else:
@@ -25,7 +25,7 @@ def single_fetch(pre_url, offset, limit):
                 return None
         except Exception as e:
             delay = config.base_delay * (2 ** attempt)
-            print(f"[{datetime.now()}] Request Exception: {e}. Retrying in {delay}s. ({attempt+1}/{max_retries})")
+            print(f"[{datetime.now()}] Request Exception: {e}. Retrying in {delay}s. ({attempt+1}/{config.max_retries})")
             time.sleep(delay)
     print(f"[{datetime.now()}] Max retries reached for offset {offset}. Giving up.")
     return None
