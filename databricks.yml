@@ -24,7 +24,7 @@ resources:
         - task_key: fetch_fra_flights
           environment_key: my_serverless_env
           spark_python_task:
-            python_file: ./fetch_airport_arr_dep.py
+            python_file: ./src/ingestion/fetch_airport_arr_dep.py
 
     # Job 2: Monthly Fetch of Reference Data
     Reference_data:
@@ -41,7 +41,7 @@ resources:
         - task_key: fetch_ref_data
           environment_key: my_serverless_env
           spark_python_task:
-            python_file: ./fetch_reference_data.py
+            python_file: ./src/ingestion/fetch_reference_data.py
 
 # databricks bundle deploy -t dev
 # databricks bundle run FRA_flights -t dev

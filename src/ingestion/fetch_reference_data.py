@@ -4,8 +4,8 @@ import os
 # allow Python to look up in current folder
 sys.path.append(os.path.abspath('.'))
 
-import config
-import ingestion_core
+from src.shared import config
+from src.shared import ingestion_core
 
 
 REFERENCE_ENDPOINTS = {
