@@ -1,6 +1,10 @@
 import sys
 import os
 from pyspark.sql.functions import current_timestamp
+# not adding the following, might cause break down
+# from pyspark.sql import SparkSession
+# from pyspark.sql.funtions import current_timestamp
+
 
 # Allow Python to find src folder
 current_dir = os.getcwd()
@@ -12,7 +16,7 @@ if project_root not in sys.path:
 from src.shared import config
 
 
-print(f"Starging Auto Loader: Bronze Flight Status")
+print(f"Starting Auto Loader: Bronze Flight Status")
 
 
 def load_bronze_flights():

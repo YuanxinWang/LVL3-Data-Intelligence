@@ -15,6 +15,23 @@ def ensure_list(element):
     return [element]
 
 
+# Instead of hard coding item_key, run the last for loop to let it figured automatically
+def normalize_data(data, resource_key):
+    if not data or resource_key not in data:
+        return data
+    try:
+        resource_node = data[resource_key]
+        for collection_key, collection_value in resource_node.items():
+            if collection_key == config.KEY_META:
+                continue
+            if isinstance(collection_value, dict):
+                for item_key, item_value in collection_value.items():
+                    collection_value[item_key] = ensure_list(item_value)
+    except Exception as e:
+        print(f"[{datetime.now()}] Warning: Generic normalization failed: {e}")
+    return data
+
+
 # print out the error details for API error responses.
 def log_api_error(data, offset):
     error_node = data.get(config.KEY_ERROR_ROOT)
