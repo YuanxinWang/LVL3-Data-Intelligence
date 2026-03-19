@@ -4,10 +4,6 @@ import time
 from datetime import datetime
 
 
-KEY_META = "Meta"
-KEY_TOTAL = "TotalCount"
-
-
 def execute_ingestion(pre_url, offset, limit, file_prefix, resource_key, target_path):
     raw_data = utils.single_fetch(pre_url, offset, limit)
     if raw_data is not None:
@@ -15,7 +11,7 @@ def execute_ingestion(pre_url, offset, limit, file_prefix, resource_key, target_
         filename = f"{timestamp}_{file_prefix}_off{offset}_lim{limit}.json"
 
         utils.save_to_volume(raw_data, target_path, filename)
-        return raw_data.get(resource_key, {}).get(KEY_META, {}).get(KEY_TOTAL, 0)
+        return raw_data.get(resource_key, {}).get(config.KEY_META, {}).get(config.KEY_TOTAL, 0)
     else:
         if limit <= 1:
             print(f"	[Critical] Offset {offset} for {file_prefix} is broken. Skipping.")

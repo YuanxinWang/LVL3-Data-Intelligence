@@ -14,8 +14,15 @@ def single_fetch(pre_url, offset, limit):
         try:
             response = requests.get(url, headers=config.HEADERS, timeout = 20)
             if response.status_code == 200:
-                return response.json()
-            elif response.status_code == [429, 502, 503, 504]:
+                data = response.json()
+                if config.KEY_ERROR_ROOT in data:
+                    error_info = data[config.KEY_ERROR_ROOT].get(config.KEY_ERROR_DETAILS, {})
+                    error_type = error_info.get(config.KEY_ERROR_TYPE, "Unknown")
+                    error_desc = error_info.get(config.KEY_ERROR_DESC, "No description")
+                    print(f"[{datetime.now()}] API Error at offset {offset}: {error_type} - {error_desc}")
+                    return None
+                return data
+            elif response.status_code in [429, 502, 503, 504]:
                 delay = config.BASE_DELAY * (2 ** attempt)
                 print(f"[{datetime.now()}] API Rate Limit. Retrying in {delay}s. ({attempt+1}/{config.MAX_RETRIES})")
                 time.sleep(delay)

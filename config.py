@@ -30,6 +30,14 @@ REF_API_LIMIT = 100
 MAX_RETRIES = 12
 BASE_DELAY = 2
 
+KEY_ERROR_ROOT = "ProcessingErrors"
+KEY_ERROR_DETAILS = "ProcessingError"
+KEY_ERROR_TYPE = "Type"
+KEY_ERROR_DESC = "Description"
+
+KEY_META = "Meta"
+KEY_TOTAL = "TotalCount"
+
 TIME_SLOTS = ["04:00", "08:00", "12:00", "16:00", "20:00", "00:00"]
 FLIGHT_TYPES = ["arrivals", "departures"]
 
