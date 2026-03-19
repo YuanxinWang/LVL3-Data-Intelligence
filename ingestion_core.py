@@ -42,5 +42,5 @@ def fetch_paginated(pre_url, file_prefix, resource_key, target_path):
         if returned_total is not None and current_offset == 0:
             total_count = returned_total
             print(f"    [Total] {total_count} records expected for {file_prefix}.")
-    current_offset += config.API_LIMIT
-    time.sleep(0.5)
+        current_offset += config.API_LIMIT
+        time.sleep(0.5)
