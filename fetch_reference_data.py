@@ -26,7 +26,8 @@ for data_type, resource_key in REFERENCE_ENDPOINTS.items():
         pre_url=pre_url, 
         file_prefix=file_prefix, 
         resource_key=resource_key, 
-        target_path=config.VOLUME_REFERENCE
+        target_path=config.VOLUME_REFERENCE,
+        api_limit=config.REF_API_LIMIT
     )
 
 

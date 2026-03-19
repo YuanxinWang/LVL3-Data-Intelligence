@@ -35,7 +35,8 @@ for date in target_dates:
                 pre_url=pre_url, 
                 file_prefix=file_prefix, 
                 resource_key=resource_key, 
-                target_path=config.VOLUME_FLIGHT_STATUS
+                target_path=config.VOLUME_FLIGHT_STATUS,
+                api_limit=config.FLI_API_LIMIT
             )
 
 print("Flight Status Ingestion Completed Successfully!")

@@ -31,16 +31,16 @@ def execute_ingestion(pre_url, offset, limit, file_prefix, resource_key, target_
         return res1 if res1 is not None else res2
 
 
-def fetch_paginated(pre_url, file_prefix, resource_key, target_path):
+def fetch_paginated(pre_url, file_prefix, resource_key, target_path, api_limit):
     current_offset = 0
     total_count = 1
 
     while current_offset < total_count:
         returned_total = execute_ingestion(
-            pre_url, current_offset, config.API_LIMIT, file_prefix, resource_key, target_path
+            pre_url, current_offset, api_limit, file_prefix, resource_key, target_path
         )
         if returned_total is not None and current_offset == 0:
             total_count = returned_total
             print(f"    [Total] {total_count} records expected for {file_prefix}.")
-        current_offset += config.API_LIMIT
+        current_offset += api_limit
         time.sleep(0.5)
