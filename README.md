@@ -4,3 +4,6 @@ Ultimate Goal: > Build a cloud-based, production-grade Lakehouse data platform f
 
 note for later: for now config in one file to secure single source of truth - better for rather smaller pipeline
 care for single case: return a list instead of a dictionary
+|^ solution: manually add back the braket - fetch only english names
+
+version control: Try my best to not repeat myself

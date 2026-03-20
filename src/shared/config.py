@@ -35,11 +35,24 @@ REF_API_LIMIT = 100
 MAX_RETRIES = 12
 BASE_DELAY = 2
 
+# Set up reference data endpoints
+REFERENCE_ENDPOINTS = {
+    "airports": "AirportResource",
+    "cities": "CityResource",
+    "countries": "CountryResource",
+    "airlines": "AirlineResource",
+    "aircraft": "AircraftResource"
+}
+
 # Error handling keys based on API response structure
 KEY_ERROR_ROOT = "ProcessingErrors"
 KEY_ERROR_DETAILS = "ProcessingError"
 KEY_ERROR_TYPE = "Type"
 KEY_ERROR_DESC = "Description"
+
+# Error handling for timeout scenario
+KEY_PROXY_ERROR = "Error"
+VAL_PROXY_TIMEOUT = "Gateway Timeout"
 
 # Metadata keys to read total count for pagination
 KEY_META = "Meta"

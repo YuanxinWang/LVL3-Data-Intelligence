@@ -48,11 +48,19 @@ resources:
             environment_version: "4"
 
       tasks:
+        # Task 1: Fetch Reference Data from API
         - task_key: fetch_ref_data
           environment_key: my_serverless_env
           spark_python_task:
             python_file: ./src/ingestion/fetch_reference_data.py
-      
+
+        # Task 2: Load Reference Data into Bronze Delta Tables
+        - task_key: run_autoloader_ref
+          depends_on:
+            - task_key: fetch_ref_data
+          environment_key: my_serverless_env
+          spark_python_task:
+            python_file: ./src/transformation/load_bronze_reference.py
 
 # databricks bundle deploy -t dev
 # databricks bundle run FRA_flights_pipeline -t dev

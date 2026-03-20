@@ -1,3 +1,4 @@
+import os
 import json
 import requests
 import time
@@ -50,14 +51,18 @@ def log_api_error(data, offset):
 # send out a request
 # return the json if success, else return None
 # exponential backoff retry mechanism for robustness against transient API issues.
+# add seperator logic to fit for both reference data and flight status data.
 def single_fetch(pre_url, offset, limit):
-    url = f"{pre_url}?limit={limit}&offset={offset}"
+    seperator = '&' if '?' in pre_url else '?'
+    url = f"{pre_url}{seperator}limit={limit}&offset={offset}"
     
     for attempt in range(config.MAX_RETRIES):
         try:
             response = requests.get(url, headers=config.HEADERS, timeout = 20)
             if response.status_code == 200:
                 data = response.json()
+                if isinstance(data, dict) and data.get(config.KEY_PROXY_ERROR) == config.VAL_PROXY_TIMEOUT:
+                    raise Exception("Proxy Timeout Error")
                 if config.KEY_ERROR_ROOT in data:
                     log_api_error(data, offset)
                     return None
@@ -79,8 +84,10 @@ def single_fetch(pre_url, offset, limit):
 
 
 # save json file to volume with offset and limit in name for tracking
+# create new folder if not exist, so it won't error out when saving files.
 def save_to_volume(raw_json, target_path, filename):
     full_path = f"{target_path}{filename}"
+    os.makedirs(target_path, exist_ok=True)
     with open(full_path, "w", encoding="utf-8") as f:
         json.dump(raw_json, f, ensure_ascii=False, indent=4)
     print(f"[{datetime.now()}] file saved: {filename}")

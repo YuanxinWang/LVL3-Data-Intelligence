@@ -12,25 +12,18 @@ from src.shared import config
 from src.shared import ingestion_core
 
 
-REFERENCE_ENDPOINTS = {
-    "airports": "AirportResource",
-    "cities": "CityResource",
-    "countries": "CountryResource",
-    "airlines": "AirlineResource",
-    "aircraft": "AircraftResource"
-}
-
-
-for data_type, resource_key in REFERENCE_ENDPOINTS.items():
+for data_type, resource_key in config.REFERENCE_ENDPOINTS.items():
     print(f"\nProcessing {data_type.upper()}...")
-    pre_url = f"{config.BASE_URL}/v1/references/{data_type}"
+    pre_url = f"{config.BASE_URL}/v1/references/{data_type}?lang=EN"
     file_prefix = f"ref_{data_type}"
+
+    target_subfolder = f"{config.VOLUME_REFERENCE}{data_type}/"
 
     ingestion_core.fetch_paginated(
         pre_url=pre_url, 
         file_prefix=file_prefix, 
         resource_key=resource_key, 
-        target_path=config.VOLUME_REFERENCE,
+        target_path=target_subfolder,
         api_limit=config.REF_API_LIMIT
     )
 

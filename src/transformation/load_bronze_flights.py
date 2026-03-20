@@ -43,3 +43,25 @@ def load_bronze_flights():
 
 if __name__ == "__main__":
     load_bronze_flights()
+
+
+# import sys
+# import os
+
+# # Allow Python to find src folder
+# current_dir = os.getcwd()
+# project_root = os.path.abspath(os.path.join(current_dir, "../../"))
+# if project_root not in sys.path:
+#     sys.path.insert(0, project_root)
+
+# from src.shared import config
+# from src.shared import bronze_core
+
+# if __name__ == "__main__":
+#     bronze_core.load_bronze_table(
+#         spark=spark, 
+#         source_path=config.VOLUME_FLIGHT_STATUS,
+#         checkpoint_location=config.CHK_BRONZE_FLIGHTS,
+#         table_name=config.TABLE_BRONZE_FLIGHTS,
+#         job_description="Bronze Flights"
+#     )
