@@ -48,6 +48,25 @@ def log_api_error(data, offset):
         print(f"[{datetime.now()}] API Error at offset {offset}: {error_type} - {error_desc}")
 
 
+# based on testing result, lots of times API respond 200 secceess code with fake data
+# before save respond data into JSON, security check:
+# process error: throw out for binary search to skip broken data / stop for empty data
+# Connection error: call exponential backoff for retry
+# normal data: pass back for saving
+def validate_response(data, offset):
+    if not isinstance(data, dict):
+        return data
+    if config.KEY_ERROR_ROOT not in data and config.KEY_META not in data:
+        for err_key in config.PROXY_ERROR_KEYS:
+            if err_key in data and data and data[err_key]:
+                error_message = data[err_key]
+                raise Exception(f"Proxy network issue (Fake 200 OK): {error_message}")
+    if config.KEY_ERROR_ROOT in data:
+        log_api_error(data, offset)
+        return None
+    return data
+
+
 # send out a request
 # return the json if success, else return None
 # exponential backoff retry mechanism for robustness against transient API issues.
@@ -60,18 +79,9 @@ def single_fetch(pre_url, offset, limit):
         try:
             response = requests.get(url, headers=config.HEADERS, timeout = 20)
             if response.status_code == 200:
-                data = response.json()
-                if isinstance(data, dict) and data.get(config.KEY_PROXY_ERROR) == config.VAL_PROXY_TIMEOUT:
-                    raise Exception("Proxy Timeout Error")
-                if config.KEY_ERROR_ROOT in data:
-                    log_api_error(data, offset)
-                    return None
-                return data
+                return validate_response(response.json(), offset)
             elif response.status_code in [429, 502, 503, 504]:
-                delay = config.BASE_DELAY * (2 ** attempt)
-                print(f"[{datetime.now()}] API Rate Limit. Retrying in {delay}s. ({attempt+1}/{config.MAX_RETRIES})")
-                time.sleep(delay)
-                continue
+                raise Exception(f"API Rate Limit or Server Error ({response.status_code})")
             else:
                 print(f"[{datetime.now()}] Error: {response.status_code} at offset {offset}")
                 return None

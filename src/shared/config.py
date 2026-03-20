@@ -50,9 +50,8 @@ KEY_ERROR_DETAILS = "ProcessingError"
 KEY_ERROR_TYPE = "Type"
 KEY_ERROR_DESC = "Description"
 
-# Error handling for timeout scenario
-KEY_PROXY_ERROR = "Error"
-VAL_PROXY_TIMEOUT = "Gateway Timeout"
+# Error handling for timeout scenarios - multiple possibility discovered
+PROXY_ERROR_KEYS = ["Error", "error", "ERROR", "message", "Message", "detail", "details"]
 
 # Metadata keys to read total count for pagination
 KEY_META = "Meta"
