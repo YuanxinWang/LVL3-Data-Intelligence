@@ -14,7 +14,7 @@ from src.shared import ingestion_core
 
 
 # Utility function to generate list of target dates based on lookback configuration
-def get_date_list(lookback_days):
+def _get_date_list(lookback_days):
     date_list = []
     for i in range(lookback_days):
         date = datetime.now() - timedelta(days = i)
@@ -22,7 +22,7 @@ def get_date_list(lookback_days):
     return date_list
 
 
-target_dates = get_date_list(config.LOOKBACK_DAYS)
+target_dates = _get_date_list(config.LOOKBACK_DAYS)
 
 
 # Iterate through each date, time slot, and flight type to fetch flight status data

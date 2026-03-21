@@ -2,13 +2,13 @@ import os
 import json
 import requests
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from src.shared import config
 
 
 # API known issue: Arrays containing just 1 member are not shown as arrays in JSON responses
 # make sure we always have a list in the end
-def ensure_list(element):
+def _ensure_list(element):
     if element is None:
         return []
     elif isinstance(element, list):
@@ -27,20 +27,20 @@ def normalize_data(data, resource_key):
                 continue
             if isinstance(collection_value, dict):
                 for item_key, item_value in collection_value.items():
-                    collection_value[item_key] = ensure_list(item_value)
+                    collection_value[item_key] = _ensure_list(item_value)
     except Exception as e:
         print(f"[{datetime.now()}] Warning: Generic normalization failed: {e}")
     return data
 
 
 # print out the error details for API error responses.
-def log_api_error(data, offset):
+def _log_api_error(data, offset):
     error_node = data.get(config.KEY_ERROR_ROOT)
     if not error_node:
         return
     if isinstance(error_node, dict):
         error_node = error_node.get(config.KEY_ERROR_DETAILS, error_node)  
-    error_list = ensure_list(error_node)
+    error_list = _ensure_list(error_node)
     if error_list:
         first_error = error_list[0]
         error_type = first_error.get(config.KEY_ERROR_TYPE, "Unknown")
@@ -53,7 +53,7 @@ def log_api_error(data, offset):
 # process error: throw out for binary search to skip broken data / stop for empty data
 # Connection error: call exponential backoff for retry
 # normal data: pass back for saving
-def validate_response(data, offset):
+def _validate_response(data, offset):
     if not isinstance(data, dict):
         return data
     if config.KEY_ERROR_ROOT not in data and config.KEY_META not in data:
@@ -62,7 +62,7 @@ def validate_response(data, offset):
                 error_message = data[err_key]
                 raise Exception(f"Proxy network issue (Fake 200 OK): {error_message}")
     if config.KEY_ERROR_ROOT in data:
-        log_api_error(data, offset)
+        _log_api_error(data, offset)
         return None
     return data
 
@@ -79,7 +79,7 @@ def single_fetch(pre_url, offset, limit):
         try:
             response = requests.get(url, headers=config.HEADERS, timeout = 20)
             if response.status_code == 200:
-                return validate_response(response.json(), offset)
+                return _validate_response(response.json(), offset)
             elif response.status_code in [429, 502, 503, 504]:
                 raise Exception(f"API Rate Limit or Server Error ({response.status_code})")
             else:

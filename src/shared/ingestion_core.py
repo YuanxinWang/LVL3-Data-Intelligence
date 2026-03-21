@@ -7,7 +7,7 @@ from src.shared import utils
 
 
 # Core function to execute paginated fetching with error handling and binary search retry mechanism
-def execute_ingestion(pre_url, offset, limit, file_prefix, resource_key, target_path):
+def _execute_ingestion(pre_url, offset, limit, file_prefix, resource_key, target_path):
     raw_data = utils.single_fetch(pre_url, offset, limit)
     if raw_data is not None:
         raw_data = utils.normalize_data(raw_data, resource_key)
@@ -26,8 +26,8 @@ def execute_ingestion(pre_url, offset, limit, file_prefix, resource_key, target_
         mid = limit // 2
         print(f"	[Retry] Binary Search at Offset {offset}, New Limit {mid}")
 
-        res1 = execute_ingestion(pre_url, offset, mid, file_prefix, resource_key, target_path)
-        res2 = execute_ingestion(pre_url, offset + mid, limit - mid, file_prefix, resource_key, target_path)
+        res1 = _execute_ingestion(pre_url, offset, mid, file_prefix, resource_key, target_path)
+        res2 = _execute_ingestion(pre_url, offset + mid, limit - mid, file_prefix, resource_key, target_path)
     
         if res1 is not None and res2 is not None:
             return max(res1, res2)
@@ -40,7 +40,7 @@ def fetch_paginated(pre_url, file_prefix, resource_key, target_path, api_limit):
     total_count = 1
 
     while current_offset < total_count:
-        returned_total = execute_ingestion(
+        returned_total = _execute_ingestion(
             pre_url, current_offset, api_limit, file_prefix, resource_key, target_path
         )
         if returned_total is not None and current_offset == 0:

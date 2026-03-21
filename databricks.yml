@@ -9,7 +9,7 @@ targets:
 
 resources:
   jobs:
-    # Job 1: Daily Pipeline for FRA Flights (Ingestion -> Bronze)
+    # Job 1: Daily Pipeline for FRA Flights (API -> JSON -> Bronze)
     FRA_flights_pipeline:
       name: "[Pipeline][Daily] FRA arr&dep to Bronze"
       schedule:
@@ -36,9 +36,9 @@ resources:
             python_file: ./src/transformation/load_bronze_flights.py
 
 
-    # Job 2: Monthly Fetch of Reference Data
+    # Job 2: Monthly Fetch of Reference Data (API ->JSON -> Bronze -> Silver)
     Reference_data:
-      name: "[Monthly] Reference Data"
+      name: "[Pipeline][Monthly] Reference Data"
       schedule:
         quartz_cron_expression: "0 0 2 1 * ?"
         timezone_id: "Europe/Berlin"
@@ -62,6 +62,36 @@ resources:
           spark_python_task:
             python_file: ./src/transformation/load_bronze_reference.py
 
+        # Task 3: Extract and Flatten into Silver Tmp/Dim Tables
+        - task_key: run_silver_ref
+          depends_on:
+            - task_key: run_autoloader_ref
+          environment_key: my_serverless_env
+          spark_python_task:
+            python_file: ./src/transformation/load_silver_reference.py
+
+        # Task 4: Assemble Final Silver Dimension Tables
+        - task_key: assemble_final_dimensions
+          depends_on:
+            - task_key: run_silver_ref
+          environment_key: my_serverless_env
+          spark_python_task:
+            python_file: ./src/transformation/assemble_silver_dim.py
+
+
+    # Job 3: Test Silver Flight
+    Test_silver_flights:
+      name: "[Test] Load Silver Flight Status"
+      environments:
+        - environment_key: my_serverless_env
+          spec:
+            environment_version: "4"
+      tasks:
+        - task_key: run_silver_flights
+          environment_key: my_serverless_env
+          spark_python_task:
+            python_file: ./src/transformation/load_silver_flights.py
+            
+
 # databricks bundle deploy -t dev
 # databricks bundle run FRA_flights_pipeline -t dev
-# databricks bundle run Reference_data -t dev
