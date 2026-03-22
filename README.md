@@ -34,3 +34,5 @@ for flight status code, API did provided status code dic in documentation - I do
 Since the defination is anyway included in returned JSON, we will keep both into our table - Future-Proof. Also, storage is cheap. A few letters more doesn't hurt that much in compare.
 
 Great. Flight status OOM again.
+Split into multiple steps. Broke again - timestamp not standard (only until minutes, no seconds)
+cast more specifically
