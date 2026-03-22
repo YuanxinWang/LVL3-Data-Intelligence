@@ -11,7 +11,7 @@ resources:
   jobs:
     # Job 1: Daily Pipeline for FRA Flights (API -> JSON -> Bronze)
     FRA_flights_pipeline:
-      name: "[Pipeline][Daily] FRA arr&dep to Bronze"
+      name: "[Pipeline][Daily] FRA arr&dep Flights"
       schedule:
         quartz_cron_expression: "0 0 23 * * ?"
         timezone_id: "Europe/Berlin"
@@ -34,6 +34,15 @@ resources:
           environment_key: my_serverless_env
           spark_python_task:
             python_file: ./src/transformation/load_bronze_flights.py
+
+        # Task 3: Extract & Flatten & Clean & Cast into Silver Fact Table
+        - task_key: run_silver_flights
+          depends_on:
+            - task_key: run_autoloader_flights
+          environment_key: my_serverless_env
+          spark_python_task:
+            python_file: ./src/transformation/load_silver_flights.py
+
 
 
     # Job 2: Monthly Fetch of Reference Data (API ->JSON -> Bronze -> Silver)
@@ -77,20 +86,6 @@ resources:
           environment_key: my_serverless_env
           spark_python_task:
             python_file: ./src/transformation/assemble_silver_dim.py
-
-
-    # Job 3: Test Silver Flight
-    Test_silver_flights:
-      name: "[Test] Load Silver Flight Status"
-      environments:
-        - environment_key: my_serverless_env
-          spec:
-            environment_version: "4"
-      tasks:
-        - task_key: run_silver_flights
-          environment_key: my_serverless_env
-          spark_python_task:
-            python_file: ./src/transformation/load_silver_flights.py
             
 
 # databricks bundle deploy -t dev
