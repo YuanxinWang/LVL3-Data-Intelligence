@@ -36,3 +36,5 @@ Since the defination is anyway included in returned JSON, we will keep both into
 Great. Flight status OOM again.
 Split into multiple steps. Broke again - timestamp not standard (only until minutes, no seconds)
 cast more specifically
+
+I start to add more detailed remark on functions: looks stupid but too many new things to learn I'm afraid I will forget some at one point and won't understand my own code.

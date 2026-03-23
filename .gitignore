@@ -3,3 +3,4 @@
 .env
 *pycache*
 *.vscode
+*.DS_Store

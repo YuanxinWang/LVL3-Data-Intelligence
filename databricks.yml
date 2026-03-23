@@ -88,5 +88,21 @@ resources:
             python_file: ./src/transformation/assemble_silver_dim.py
             
 
+    Test_gold:
+      name: "[Test] Gold Airport Operations"
+      schedule:
+        quartz_cron_expression: "0 0 3 * * ?"
+        timezone_id: "Europe/Berlin"
+      environments:
+        - environment_key: my_serverless_env
+          spec:
+            environment_version: "4"
+
+      tasks:
+        - task_key: run_gold_airport_hourly
+          environment_key: my_serverless_env
+          spark_python_task:
+            python_file: ./src/transformation/load_gold_airport_hourly.py
+
 # databricks bundle deploy -t dev
 # databricks bundle run FRA_flights_pipeline -t dev
