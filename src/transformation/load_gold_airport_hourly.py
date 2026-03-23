@@ -12,62 +12,22 @@ if project_root not in sys.path:
 
 from src.shared import config
 from src.shared import delta_utils
-
-
-# convert timezone and add business fetures (tiem wave, weekend, delay status)
-def _add_business_features(df_raw):
-    df_local = df_raw.withColumn(
-        "local_scheduled_time",
-        F.from_utc_timestamp("scheduled_departure_utc", "Europe/Berlin")
-    ).withColumn(
-        "local_actual_time",
-        F.from_utc_timestamp("actual_departure_utc", "Europe/Berlin")
-    )
-
-    df_add = df_local.withColumn(
-        "scheduled_date",
-        F.to_date(F.col("local_scheduled_time"))
-    ).withColumn(
-        "scheduled_hour",
-        F.hour(F.col("local_scheduled_time"))
-    ).withColumn(
-        "is_morning_wave",
-        F.when(F.col("scheduled_hour").between(6, 9), True).otherwise(False)
-    ).withColumn(
-        "is_weekend",
-        F.when(F.dayofweek(F.col("local_scheduled_time")).isin([1,7]), True).otherwise(False)
-    )
-
-    df_delay = df_add.withColumn(
-        "delay_minutes",
-        F.when(
-            F.col("local_actual_time").isNotNull(),
-            F.round((F.unix_timestamp(F.col("local_actual_time")) - F.unix_timestamp(F.col("local_scheduled_time"))) / 60)
-        ).otherwise(0)
-    )
-
-    df_new = df_delay.withColumn(
-        "status_category",
-        F.when(F.col("flight_status_desc") == "Cancelled", "Cancelled")
-        .when(F.col("delay_minutes") <= 0, "On_time")
-        .when(F.col("delay_minutes") < 15, "Minor_Delay")
-        .otherwise("Major_Delay")
-    )
-
-    return df_new
+from src.shared import gold_core
 
 
 # group by date and hour
 # group: build folders: date & hour -> data now sorted
-# gropBy("scheduled_date", "scheduled_hour"): new key （2 columns）: scheduled_date & scheduled_hour
+# gropBy("scheduled_date", "scheduled_hour"): new key （columns）: scheduled_date & scheduled_hour ...
 # agg: caulculator -> how many on time, how long total delayed. (always couple with groupBy, served as withColumn)
 # (withColumn keeps current, agg creates from scratch)
 # afterwards, the new chart will be like:
-# scheduled_date | scheduled_hour | total_flights | on_time_flights | total_delay_minutes
+# scheduled_date | scheduled_hour | is_weekend | is_morning_wave | total_flights | on_time_flights | total_delay_minutes
 def _group_by_date_and_hour(df_added):
     df_group = df_added.groupBy(
         "scheduled_date",
-        "scheduled_hour"
+        "scheduled_hour",
+        "is_weekend"
+        "is_morning_wave",
     ).agg(
         F.count("flight_number").alias("total_flights"),
         F.sum(F.when(F.col("status_category") == "On_time", 1).otherwise(0)).alias("on_time_flights"),
@@ -110,7 +70,7 @@ def process_gold_airport_hourly(spark):
     sys.stdout.flush()
 
     df_raw = spark.read.table(f"{config.CATALOG_NAME}.{config.SCHEMA_NAME}.silver_fact_flights")
-    df1 = _add_business_features(df_raw)
+    df1 = gold_core.add_business_features(df_raw)
     df2 = _group_by_date_and_hour(df1)
     df_final = _past_three_hours_delay(df2)
 
