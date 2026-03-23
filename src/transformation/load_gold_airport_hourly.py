@@ -26,7 +26,7 @@ def _group_by_date_and_hour(df_added):
     df_group = df_added.groupBy(
         "scheduled_date",
         "scheduled_hour",
-        "is_weekend"
+        "is_weekend",
         "is_morning_wave",
     ).agg(
         F.count("flight_number").alias("total_flights"),
