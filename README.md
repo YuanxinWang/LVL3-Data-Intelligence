@@ -38,3 +38,6 @@ Split into multiple steps. Broke again - timestamp not standard (only until minu
 cast more specifically
 
 I start to add more detailed remark on functions: looks stupid but too many new things to learn I'm afraid I will forget some at one point and won't understand my own code.
+
+Great to know: in flight status, it's called "airline id", but in reference_airline, it's called "airline code"
+New issue: did not seperate departure and arrival data. Now the data tables are messy. Need messive update
