@@ -9,7 +9,7 @@ targets:
 
 resources:
   jobs:
-    # Job 1: Daily Pipeline for FRA Flights (API -> JSON -> Bronze)
+    # Job 1: Daily Pipeline for FRA Flights (API -> JSON -> Bronze -> Silver -> Gold)
     FRA_flights_pipeline:
       name: "[Pipeline][Daily] FRA arr&dep Flights"
       schedule:
@@ -42,7 +42,22 @@ resources:
           environment_key: my_serverless_env
           spark_python_task:
             python_file: ./src/transformation/load_silver_flights.py
-
+  
+        # Task 4: Assemble Gold Table for Airport Operations
+        - task_key: run_gold_airport_hourly
+          depends_on:
+            - task_key: run_silver_flights
+          environment_key: my_serverless_env
+          spark_python_task:
+            python_file: ./src/transformation/load_gold_airport_hourly.py
+  
+        # Task 5: Assemble Gold Table for Airline Performance
+        - task_key: run_gold_airline_performance
+          depends_on:
+            - task_key: run_silver_flights
+          environment_key: my_serverless_env
+          spark_python_task:
+            python_file: ./src/transformation/load_gold_airline_performance.py
 
 
     # Job 2: Monthly Fetch of Reference Data (API ->JSON -> Bronze -> Silver)
@@ -86,23 +101,7 @@ resources:
           environment_key: my_serverless_env
           spark_python_task:
             python_file: ./src/transformation/assemble_silver_dim.py
-            
 
-    Test_gold:
-      name: "[Test] Gold Airport Operations"
-      schedule:
-        quartz_cron_expression: "0 0 3 * * ?"
-        timezone_id: "Europe/Berlin"
-      environments:
-        - environment_key: my_serverless_env
-          spec:
-            environment_version: "4"
-
-      tasks:
-        - task_key: run_gold_airport_hourly
-          environment_key: my_serverless_env
-          spark_python_task:
-            python_file: ./src/transformation/load_gold_airport_hourly.py
 
 # databricks bundle deploy -t dev
 # databricks bundle run FRA_flights_pipeline -t dev
