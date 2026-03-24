@@ -51,13 +51,13 @@ resources:
           spark_python_task:
             python_file: ./src/transformation/load_gold_airport_hourly.py
   
-        # Task 5: Assemble Gold Table for Airline Performance
-        - task_key: run_gold_airline_performance
+        # Task 5: Assemble Gold Table for Flight Performance
+        - task_key: run_gold_flight_performance
           depends_on:
             - task_key: run_silver_flights
           environment_key: my_serverless_env
           spark_python_task:
-            python_file: ./src/transformation/load_gold_airline_performance.py
+            python_file: ./src/transformation/load_gold_flight_performance.py
 
 
     # Job 2: Monthly Fetch of Reference Data (API ->JSON -> Bronze -> Silver)

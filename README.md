@@ -49,3 +49,9 @@ new feature: add differece between departure delay and arrival delay. - clear re
 same reason: reference time added to differenciate sheduled_hour
 
 dashboard v1 working. Maybe todo: automated refresh - email reminder for refreshed data.
+consider: gold layer remove scheduled but not finished flights data - they will polute the dashboard but keep in silver as they are still valid data, might be useful in the future
+consider: timezone should not be hard coded
+
+3.24 todo:
+- to simplify user experience, consider using view (materialized view?) - need more study into it
+- go back to silver, add aircraft/equipment information - new analization demension: aircraft&delay relationship

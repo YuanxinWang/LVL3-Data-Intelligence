@@ -25,6 +25,7 @@ VOLUME_REFERENCE = f"{VOLUME_BASE_PATH}/reference_data/"
 
 # Target airport and lookback configuration
 HUB_AIRPORT = "FRA"
+HUB_TIMEZONE = "Europe/Berlin"
 LOOKBACK_DAYS = 7
 
 # API limits for different endpoints
