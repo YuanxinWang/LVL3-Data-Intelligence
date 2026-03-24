@@ -16,6 +16,7 @@ from src.shared import delta_utils
 # subset allows na in non-critical columns
 
 # flatten JSON
+# OOM -> Decoupling. Seperate action flatten and casting
 def _extract_flight_features(df_raw):
     df_extracted = df_raw.select(
         explode_outer("FlightStatusResource.Flights.Flight").alias("fl")
@@ -51,6 +52,7 @@ def _extract_flight_features(df_raw):
 # cast timestamp & add new timestamp
 # filter instead of na.drop -> save calculation
 # Explicit Schema Declaration -> select instead of withColumn
+# (everytime .withColumn, we are creating a new DataFrame. We have ~20 cols -> OOM. Select instead)
 def _clean_and_cast_flights(df_extracted):
     df_filtered = df_extracted.filter(
         col("airline_id").isNotNull() &

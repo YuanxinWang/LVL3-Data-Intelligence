@@ -18,13 +18,14 @@ from src.shared import gold_core
 # group: build folders: date & hour -> data now sorted
 # agg: always couple with groupBy, served as withColumn (withColumn keeps current, agg creates from scratch)
 # afterwards, the new chart will be like:
-# flight_number | direction | airline_id | total_flights | cancelled_times | avg_delay_minutes
+# flight_number | direction | airline_id | aircraft_code | total_flights | cancelled_times | avg_delay_minutes
 # | max_delay_minutes | on_time_times | on_time_rate | gold_processed_at
 def _group_by_flight_number(df_added):
     df_group = df_added.groupBy(
         "flight_number",
         "direction",
-        "airline_id"
+        "airline_id",
+        "aircraft_code"
     ).agg(
         F.count("flight_number").alias("total_flights"),
         F.sum(F.when(F.col("status_category") == "Cancelled", 1).otherwise(0)).alias("cancelled_times"),
@@ -52,7 +53,7 @@ def process_gold_flight_performance(spark):
     df_final = _group_by_flight_number(df_business)
 
     target_table = f"{config.CATALOG_NAME}.{config.SCHEMA_NAME}.gold_flight_performance"
-    composite_pk = ["flight_number", "direction", "airline_id"]
+    composite_pk = ["flight_number", "direction", "airline_id", "aircraft_code"]
 
     delta_utils.upsert_to_delta(spark, df_final, target_table, composite_pk)
 
