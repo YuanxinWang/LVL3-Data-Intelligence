@@ -105,3 +105,4 @@ resources:
 
 # databricks bundle deploy -t dev
 # databricks bundle run FRA_flights_pipeline -t dev
+# databricks bundle run FRA_flights_pipeline --only run_gold_airport_hourly -t dev

@@ -21,17 +21,21 @@ from src.shared import gold_core
 # agg: caulculator -> how many on time, how long total delayed. (always couple with groupBy, served as withColumn)
 # (withColumn keeps current, agg creates from scratch)
 # afterwards, the new chart will be like:
-# scheduled_date | scheduled_hour | is_weekend | is_morning_wave | total_flights | on_time_flights | total_delay_minutes
+# scheduled_date | scheduled_hour | direction | is_weekend | is_morning_wave | total_flights | on_time_flights
+# | cancelled_flights | total_delay_minutes
 def _group_by_date_and_hour(df_added):
     df_group = df_added.groupBy(
         "scheduled_date",
         "scheduled_hour",
+        "direction",
         "is_weekend",
         "is_morning_wave",
     ).agg(
         F.count("flight_number").alias("total_flights"),
         F.sum(F.when(F.col("status_category") == "On_time", 1).otherwise(0)).alias("on_time_flights"),
-        F.sum("delay_minutes").alias("total_delay_minutes")
+        F.sum(F.when(F.col("status_category") == "Cancelled", 1).otherwise(0)).alias("cancelled_flights"),
+        F.sum("delay_minutes").alias("total_delay_minutes"),
+        F.round(F.avg("delay_minutes"), 2).alias("avg_delay_minutes")
     )
 
     return df_group
@@ -49,7 +53,7 @@ def _group_by_date_and_hour(df_added):
 #   it will calculate the value and stay focus on three hous only.
 # if first flight in the morning, no past 3 hours, so fill with 0
 def _past_three_hours_delay(df_group):
-    my_window = Window.partitionBy("scheduled_date").orderBy("scheduled_hour").rangeBetween(-3, -1)
+    my_window = Window.partitionBy("scheduled_date", "direction").orderBy("scheduled_hour").rangeBetween(-3, -1)
 
     df_final = df_group.withColumn(
         "past_3_hours_delay",
@@ -75,7 +79,7 @@ def process_gold_airport_hourly(spark):
     df_final = _past_three_hours_delay(df2)
 
     target_table = f"{config.CATALOG_NAME}.{config.SCHEMA_NAME}.gold_airport_hourly_operations"
-    composite_pk = ["scheduled_date", "scheduled_hour"]
+    composite_pk = ["scheduled_date", "scheduled_hour", "direction"]
     delta_utils.upsert_to_delta(spark, df_final, target_table, composite_pk)
 
     print(f"Successfully loaded AIRPORT HOURLY data into {target_table}")

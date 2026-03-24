@@ -41,3 +41,9 @@ I start to add more detailed remark on functions: looks stupid but too many new 
 
 Great to know: in flight status, it's called "airline id", but in reference_airline, it's called "airline code"
 New issue: did not seperate departure and arrival data. Now the data tables are messy. Need messive update
+
+add new col in gold key to differenciate dep and arr
+Also, need to take into consideration: Data Completeness for "today" - late flight might not arrived yet or data not updated. Will normally be fix later with gerge(upsert), but not for 'today'
+Possible solution: add filter condition WHERE status_category != 'Scheduled' in this case
+new feature: add differece between departure delay and arrival delay. - clear responsibility for target airport
+same reason: reference time added to differenciate sheduled_hour
