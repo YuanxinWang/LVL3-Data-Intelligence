@@ -47,3 +47,5 @@ Also, need to take into consideration: Data Completeness for "today" - late flig
 Possible solution: add filter condition WHERE status_category != 'Scheduled' in this case
 new feature: add differece between departure delay and arrival delay. - clear responsibility for target airport
 same reason: reference time added to differenciate sheduled_hour
+
+dashboard v1 working. Maybe todo: automated refresh - email reminder for refreshed data.

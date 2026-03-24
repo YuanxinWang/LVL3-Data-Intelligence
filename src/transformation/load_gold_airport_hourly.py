@@ -20,9 +20,10 @@ from src.shared import gold_core
 # gropBy("scheduled_date", "scheduled_hour"): new key （columns）: scheduled_date & scheduled_hour ...
 # agg: caulculator -> how many on time, how long total delayed. (always couple with groupBy, served as withColumn)
 # (withColumn keeps current, agg creates from scratch)
+# still leave is_weekend check and is_morning_wave check for dashboard design (used as filter)
 # afterwards, the new chart will be like:
 # scheduled_date | scheduled_hour | direction | is_weekend | is_morning_wave | total_flights | on_time_flights
-# | cancelled_flights | total_delay_minutes
+# | cancelled_flights | total_delay_minutes | avg_delay_minutes
 def _group_by_date_and_hour(df_added):
     df_group = df_added.groupBy(
         "scheduled_date",
