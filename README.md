@@ -55,3 +55,7 @@ consider: timezone should not be hard coded
 3.24 todo:
 - to simplify user experience, consider using view (materialized view?) - need more study into it
 - go back to silver, add aircraft/equipment information - new analization demension: aircraft&delay relationship
+
+
+
+Things to be fixed: delete chache, rename utils, add log, edit readme

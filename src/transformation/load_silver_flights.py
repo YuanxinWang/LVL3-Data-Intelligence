@@ -60,21 +60,22 @@ def _clean_and_cast_flights(df_extracted):
         col("sched_dep_str").isNotNull()
     )
 
+    timestemp_format = "yyyy-MM-dd'T'HH:mm'Z'"
     df_casted = df_filtered.select(
         col("airline_id"),
         col("flight_number"),
-        to_timestamp(col("sched_dep_str"), "yyyy-MM-dd'T'HH:mm'Z'").alias("scheduled_departure_utc"),
+        to_timestamp(col("sched_dep_str"), timestemp_format).alias("scheduled_departure_utc"),
 
         col("dep_airport_code"),
-        to_timestamp(col("act_dep_str"), "yyyy-MM-dd'T'HH:mm'Z'").alias("actual_departure_utc"),
+        to_timestamp(col("act_dep_str"), timestemp_format).alias("actual_departure_utc"),
         col("dep_terminal"),
         col("dep_gate"),
         col("dep_time_status_code"),
         col("dep_time_status_desc"),
 
         col("arr_airport_code"),
-        to_timestamp(col("sched_arr_str"), "yyyy-MM-dd'T'HH:mm'Z'").alias("scheduled_arrival_utc"),
-        to_timestamp(col("act_arr_str"), "yyyy-MM-dd'T'HH:mm'Z'").alias("actual_arrival_utc"),
+        to_timestamp(col("sched_arr_str"), timestemp_format).alias("scheduled_arrival_utc"),
+        to_timestamp(col("act_arr_str"), timestemp_format).alias("actual_arrival_utc"),
         col("arr_terminal"),
         col("arr_gate"),
         col("arr_time_status_code"),
