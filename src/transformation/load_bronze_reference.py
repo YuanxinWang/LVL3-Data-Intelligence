@@ -1,5 +1,7 @@
 import sys
 import os
+import logging
+import databricks.pipelines as dp
 
 # Allow Python to find src folder
 current_dir = os.getcwd()
@@ -9,21 +11,45 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from src.shared import config
-from src.shared import bronze_core
+from src.shared.bronze_core import get_bronze_stream
 
 
-if __name__ == "__main__":
-    print(f"Starting Unified Bronze Load for Reference Data...")
-    for data_type in config.REFERENCE_ENDPOINTS.keys():
-        source_path = f"{config.VOLUME_REFERENCE}{data_type}/"
-        checkpoint_path = f"{config.CHECKPOINT_BASE}/bronze_reference_{data_type}/"
-        table_name = f"{config.CATALOG_NAME}.{config.SCHEMA_NAME}.bronze_reference_{data_type}"
-        print(f"Loading {data_type.upper()} reference data into Bronze...")
-        bronze_core.load_bronze_table(
-            spark=spark, 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+logger.info("Starting Unified Bronze Load Declarations for Reference Data...")
+
+
+# -------------------------------------------------------------------------
+# ARCHITECTURE NOTE: WHY NESTED FUNCTIONS (CLOSURES)?
+# -------------------------------------------------------------------------
+# We use a factory pattern (closure) here to dynamically generate multiple 
+# @dp.table pipelines inside a for-loop. 
+# 
+# In Python, decorators must wrap distinct function objects. If we define a 
+# single function outside and loop over it, Python's "late-binding" behavior 
+# will cause all iterations to point to the same memory address, resulting 
+# in only the last table being created. 
+# 
+# Nesting `generate_table` forces Python to allocate a fresh, isolated 
+# function in memory for each API endpoint, allowing the Databricks engine 
+# to register them as separate tables successfully.
+# -------------------------------------------------------------------------
+def create_reference_table(endpoint_key):
+    @dp.table(
+        name = f"reference_{endpoint_key}",
+        comment = f"Raw bronze data for {endpoint_key.upper()}"
+    )
+    def generate_table():
+        source_path = f"{config.VOLUME_REFERENCE}{endpoint_key}"
+        bronze_reference = get_bronze_stream(
+            spark=spark,
             source_path=source_path,
-            checkpoint_path=checkpoint_path,
-            table_name=table_name,
-            job_description=f"Bronze Reference - {data_type.upper()}"
+            job_description=f"Bronze Reference - {endpoint_key.upper()}"
         )
-    print("All reference data loaded into Bronze successfully!")
+        return bronze_reference
+    return generate_table
+
+
+for data_type in config.REFERENCE_ENDPOINTS.keys():
+    create_reference_table(data_type)

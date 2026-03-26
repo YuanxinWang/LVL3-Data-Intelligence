@@ -1,6 +1,7 @@
 import sys
 import os
-from pyspark.sql.functions import current_timestamp
+import logging
+import databricks.pipelines as dp
 # not adding the following, might cause break down
 # from pyspark.sql import SparkSession
 # from pyspark.sql.funtions import current_timestamp
@@ -14,32 +15,23 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from src.shared import config
+from src.shared.bronze_core import get_bronze_stream
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
-print(f"Starting Auto Loader: Bronze Flight Status")
+@dp.table(
+    name = "flight_status",
+    comment = "Raw streaming flight status data ingested from JSON volumes"
+)
 
 
-def load_bronze_flights():
-    source_path = config.VOLUME_FLIGHT_STATUS
-    print(f"Reading from source path: {source_path}")
-    raw_df = (spark.readStream
-              .format("cloudFiles")
-              .option("cloudFiles.format", "json")
-              .option("cloudFiles.schemaLocation", config.CHK_BRONZE_FLIGHTS)
-              .option("cloudFiles.inferColumnTypes", "true")
-              .option("multiLine", "true")
-              .load(source_path))
-    enriched_df = raw_df.withColumn("bronze_ingested_at", current_timestamp())
-    print(f"Writing to Delta Table: {config.TABLE_BRONZE_FLIGHTS}")
-    query = (enriched_df.writeStream
-             .format("delta")
-             .option("checkpointLocation", config.CHK_BRONZE_FLIGHTS)
-             .trigger(availableNow=True)
-             .option("mergeSchema", "true")
-             .toTable(config.TABLE_BRONZE_FLIGHTS))
-    query.awaitTermination()
-    print("Bronze FLight Status loaded successfully.")
-
-
-if __name__ == "__main__":
-    load_bronze_flights()
+def bronze_flight_status():
+    logger.info("Starging Auto Loader Pipeline: Bronze Flight Status")
+    bronze_flight = get_bronze_stream(
+        spark=spark,
+        source_path=config.VOLUME_FLIGHT_STATUS,
+        job_description="Bronze Flight Status"
+        )
+    return bronze_flight
