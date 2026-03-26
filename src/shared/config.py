@@ -3,7 +3,13 @@
 # Call ov.getenv() in this case - need os library
 # In our case, provide a default value for testing purposes.
 import os
+import logging
 from datetime import datetime
+
+# initialize logger
+# set info as log level for recording
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 BASE_URL = "https://lh-proxy.onrender.com"
 
@@ -13,7 +19,7 @@ try:
 
     PROXY_PASSWORD = dbutils.secrets.get(scope="lh_secrets", key="proxy_pass")
 except Exception as e:
-    print(f"[{datetime.now()}] Databricks secret fetch failed: {e}")
+    logger.warning(f"[{datetime.now()}] Databricks secret fetch failed: {e}. Falling back to local env")
     PROXY_PASSWORD = os.getenv("LH_PROXY_PASSWORD", "default_password")
 
 HEADERS = {"password": PROXY_PASSWORD}
@@ -62,11 +68,16 @@ KEY_TOTAL = "TotalCount"
 TIME_SLOTS = ["04:00", "08:00", "12:00", "16:00", "20:00", "00:00"]
 FLIGHT_TYPES = ["arrivals", "departures"]
 
-print(f"[{datetime.now()}] Config loaded successfully. Proxy password: {'*' * len(PROXY_PASSWORD)}")
+logger.info(f"[{datetime.now()}] Config loaded successfully. Proxy password: {'*' * len(PROXY_PASSWORD)}")
 
 
 # ----- Medallion Architecture Configurations -----
 
+SCHEMA_BRONZE = "bronze"
+SCHEMA_SILVER = "silver"
+SCHEMA_GOLD = "gold"
+
+# ----- for Silver and Gold layer while we adjust the schema form -----
 # Unity Catalog standard name: catalog.schema.table
 CATALOG_NAME = "workspace"
 SCHEMA_NAME = "lufthansa"
